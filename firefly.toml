@@ -1,0 +1,7 @@
+app_id = "fp8x8"
+app_name = "Fill Pattern 8x8"
+author_id = "peter"
+author_name = "Peter Hellberg"
+
+[files]
+font = { path = "eg_6x12.fff" }
