@@ -4,7 +4,7 @@
 // This work is dedicated to the Public Domain by ACED, licensed under CC0
 // https://creativecommons.org/publicdomain/zero/1.0/
 
-pub const Lines = enum {
+pub const Lines = enum(u8) {
     horizontal,
     horizontalmedium,
     horizontalbold,
@@ -66,8 +66,10 @@ pub const Lines = enum {
     sinistershallow,
     sinistershallowmedium,
 
+    pub const Count: i32 = @intCast(@intFromEnum(Lines.sinistershallowmedium) + 1);
+
     pub fn sprite(self: Lines) [8]u8 {
-       return switch (self) {
+        return switch (self) {
             .horizontal => [8]u8{
                 0b00000000,
                 0b11111111,

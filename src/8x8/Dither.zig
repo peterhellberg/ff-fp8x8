@@ -4,7 +4,7 @@
 // This work is dedicated to the Public Domain by ACED, licensed under CC0
 // https://creativecommons.org/publicdomain/zero/1.0/
 
-pub const Dither = enum {
+pub const Dither = enum(u8) {
     bayerdither00,
     bayerdither01,
     bayerdither02,
@@ -35,8 +35,10 @@ pub const Dither = enum {
     officedither80,
     officedither90,
 
+    pub const Count: i32 = @intCast(@intFromEnum(Dither.officedither90) + 1);
+
     pub fn sprite(self: Dither) [8]u8 {
-       return switch (self) {
+        return switch (self) {
             .bayerdither00 => [8]u8{
                 0b00000000,
                 0b00000000,

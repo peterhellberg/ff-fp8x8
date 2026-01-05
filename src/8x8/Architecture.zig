@@ -4,7 +4,7 @@
 // This work is dedicated to the Public Domain by ACED, licensed under CC0
 // https://creativecommons.org/publicdomain/zero/1.0/
 
-pub const Architecture = enum {
+pub const Architecture = enum(u8) {
     brickdense,
     bricknarrow,
     brickwide,
@@ -40,8 +40,10 @@ pub const Architecture = enum {
     house,
     housemini,
 
+    pub const Count: i32 = @intCast(@intFromEnum(Architecture.housemini) + 1);
+
     pub fn sprite(self: Architecture) [8]u8 {
-       return switch (self) {
+        return switch (self) {
             .brickdense => [8]u8{
                 0b00000000,
                 0b01111111,

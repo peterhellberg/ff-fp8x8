@@ -4,7 +4,7 @@
 // This work is dedicated to the Public Domain by ACED, licensed under CC0
 // https://creativecommons.org/publicdomain/zero/1.0/
 
-pub const Symbols = enum {
+pub const Symbols = enum(u8) {
     love,
     heart,
     heartsolid,
@@ -22,8 +22,10 @@ pub const Symbols = enum {
     invadingcrab,
     invadingsquid,
 
+    pub const Count: i32 = @intCast(@intFromEnum(Symbols.invadingsquid) + 1);
+
     pub fn sprite(self: Symbols) [8]u8 {
-       return switch (self) {
+        return switch (self) {
             .love => [8]u8{
                 0b01000100,
                 0b00101000,

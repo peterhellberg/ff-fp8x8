@@ -4,7 +4,7 @@
 // This work is dedicated to the Public Domain by ACED, licensed under CC0
 // https://creativecommons.org/publicdomain/zero/1.0/
 
-pub const Dashes = enum {
+pub const Dashes = enum(u8) {
     horizontaldensetrellis,
     horizontaldensedotdash,
     horizontaldash,
@@ -18,8 +18,10 @@ pub const Dashes = enum {
     alternatingdashdouble,
     alternatingdashmini,
 
+    pub const Count: i32 = @intCast(@intFromEnum(Dashes.alternatingdashmini) + 1);
+
     pub fn sprite(self: Dashes) [8]u8 {
-       return switch (self) {
+        return switch (self) {
             .horizontaldensetrellis => [8]u8{
                 0b00110011,
                 0b00000000,

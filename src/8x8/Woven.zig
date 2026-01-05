@@ -4,7 +4,7 @@
 // This work is dedicated to the Public Domain by ACED, licensed under CC0
 // https://creativecommons.org/publicdomain/zero/1.0/
 
-pub const Woven = enum {
+pub const Woven = enum(u8) {
     interlinked,
     weavedense,
     weave,
@@ -20,8 +20,10 @@ pub const Woven = enum {
     plaid,
     tartan,
 
+    pub const Count: i32 = @intCast(@intFromEnum(Woven.tartan) + 1);
+
     pub fn sprite(self: Woven) [8]u8 {
-       return switch (self) {
+        return switch (self) {
             .interlinked => [8]u8{
                 0b01110101,
                 0b11101110,

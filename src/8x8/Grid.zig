@@ -4,7 +4,7 @@
 // This work is dedicated to the Public Domain by ACED, licensed under CC0
 // https://creativecommons.org/publicdomain/zero/1.0/
 
-pub const Grid = enum {
+pub const Grid = enum(u8) {
     gridlight,
     gridlightdot,
     grid,
@@ -21,8 +21,10 @@ pub const Grid = enum {
     honeycomb,
     trapezoid,
 
+    pub const Count: i32 = @intCast(@intFromEnum(Grid.trapezoid) + 1);
+
     pub fn sprite(self: Grid) [8]u8 {
-       return switch (self) {
+        return switch (self) {
             .gridlight => [8]u8{
                 0b10101010,
                 0b00000000,

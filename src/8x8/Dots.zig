@@ -4,7 +4,7 @@
 // This work is dedicated to the Public Domain by ACED, licensed under CC0
 // https://creativecommons.org/publicdomain/zero/1.0/
 
-pub const Dots = enum {
+pub const Dots = enum(u8) {
     pixel,
     pixelmini,
     glisten,
@@ -15,8 +15,10 @@ pub const Dots = enum {
     diamondspeckled,
     confettilarge,
 
+    pub const Count: i32 = @intCast(@intFromEnum(Dots.confettilarge) + 1);
+
     pub fn sprite(self: Dots) [8]u8 {
-       return switch (self) {
+        return switch (self) {
             .pixel => [8]u8{
                 0b00000000,
                 0b00000000,

@@ -4,7 +4,7 @@
 // This work is dedicated to the Public Domain by ACED, licensed under CC0
 // https://creativecommons.org/publicdomain/zero/1.0/
 
-pub const Waves = enum {
+pub const Waves = enum(u8) {
     ripplelight,
     ripple,
     wave,
@@ -37,8 +37,10 @@ pub const Waves = enum {
     riseandfall,
     doublehelix,
 
+    pub const Count: i32 = @intCast(@intFromEnum(Waves.doublehelix) + 1);
+
     pub fn sprite(self: Waves) [8]u8 {
-       return switch (self) {
+        return switch (self) {
             .ripplelight => [8]u8{
                 0b00000000,
                 0b01010000,

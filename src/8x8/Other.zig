@@ -4,7 +4,7 @@
 // This work is dedicated to the Public Domain by ACED, licensed under CC0
 // https://creativecommons.org/publicdomain/zero/1.0/
 
-pub const Other = enum {
+pub const Other = enum(u8) {
     chain,
     chainlarge,
     rosette,
@@ -12,8 +12,10 @@ pub const Other = enum {
     festive,
     yuletide,
 
+    pub const Count: i32 = @intCast(@intFromEnum(Other.yuletide) + 1);
+
     pub fn sprite(self: Other) [8]u8 {
-       return switch (self) {
+        return switch (self) {
             .chain => [8]u8{
                 0b00010000,
                 0b00101000,

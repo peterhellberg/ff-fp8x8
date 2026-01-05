@@ -4,7 +4,7 @@
 // This work is dedicated to the Public Domain by ACED, licensed under CC0
 // https://creativecommons.org/publicdomain/zero/1.0/
 
-pub const Rectilinear = enum {
+pub const Rectilinear = enum(u8) {
     squaremicro,
     squaremicrooffset,
     squareminihighlight,
@@ -44,8 +44,10 @@ pub const Rectilinear = enum {
     block,
     blockpyramid,
 
+    pub const Count: i32 = @intCast(@intFromEnum(Rectilinear.blockpyramid) + 1);
+
     pub fn sprite(self: Rectilinear) [8]u8 {
-       return switch (self) {
+        return switch (self) {
             .squaremicro => [8]u8{
                 0b00000000,
                 0b01100110,

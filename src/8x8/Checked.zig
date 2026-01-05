@@ -4,7 +4,7 @@
 // This work is dedicated to the Public Domain by ACED, licensed under CC0
 // https://creativecommons.org/publicdomain/zero/1.0/
 
-pub const Checked = enum {
+pub const Checked = enum(u8) {
     checkmicro,
     checkmini,
     check,
@@ -34,8 +34,10 @@ pub const Checked = enum {
     chevroncheckdense,
     chevroncheck,
 
+    pub const Count: i32 = @intCast(@intFromEnum(Checked.chevroncheck) + 1);
+
     pub fn sprite(self: Checked) [8]u8 {
-       return switch (self) {
+        return switch (self) {
             .checkmicro => [8]u8{
                 0b10101010,
                 0b01010101,

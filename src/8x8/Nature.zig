@@ -4,7 +4,7 @@
 // This work is dedicated to the Public Domain by ACED, licensed under CC0
 // https://creativecommons.org/publicdomain/zero/1.0/
 
-pub const Nature = enum {
+pub const Nature = enum(u8) {
     scalessparse,
     scales,
     scallop,
@@ -38,8 +38,10 @@ pub const Nature = enum {
     bouldercracked,
     bamboo,
 
+    pub const Count: i32 = @intCast(@intFromEnum(Nature.bamboo) + 1);
+
     pub fn sprite(self: Nature) [8]u8 {
-       return switch (self) {
+        return switch (self) {
             .scalessparse => [8]u8{
                 0b01111100,
                 0b00111001,

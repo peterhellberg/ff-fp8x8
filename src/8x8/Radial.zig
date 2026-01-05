@@ -4,7 +4,7 @@
 // This work is dedicated to the Public Domain by ACED, licensed under CC0
 // https://creativecommons.org/publicdomain/zero/1.0/
 
-pub const Radial = enum {
+pub const Radial = enum(u8) {
     nebula,
     pinwheel,
     pivot,
@@ -19,8 +19,10 @@ pub const Radial = enum {
     cartwheelbold,
     cartwheelextrabold,
 
+    pub const Count: i32 = @intCast(@intFromEnum(Radial.cartwheelextrabold) + 1);
+
     pub fn sprite(self: Radial) [8]u8 {
-       return switch (self) {
+        return switch (self) {
             .nebula => [8]u8{
                 0b00000000,
                 0b00010000,
