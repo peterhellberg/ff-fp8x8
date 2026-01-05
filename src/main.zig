@@ -198,23 +198,48 @@ const Gallery = enum {
     Waves,
     Woven,
 
+    fn wrapIndex(value: i32, count: i32) i32 {
+        var r = @mod(value, count);
+        if (r < 0) r += count;
+
+        return r;
+    }
+
     fn sprite(self: Gallery, number: i32) [8]u8 {
+        const idx = switch (self) {
+            .Dither => wrapIndex(number, Dither.Count),
+            .Dots => wrapIndex(number, Dots.Count),
+            .Dashes => wrapIndex(number, Dashes.Count),
+            .Lines => wrapIndex(number, Lines.Count),
+            .Waves => wrapIndex(number, Waves.Count),
+            .Grid => wrapIndex(number, Grid.Count),
+            .Checked => wrapIndex(number, Checked.Count),
+            .Rectilinear => wrapIndex(number, Rectilinear.Count),
+            .Radial => wrapIndex(number, Radial.Count),
+            .Round => wrapIndex(number, Round.Count),
+            .Woven => wrapIndex(number, Woven.Count),
+            .Architecture => wrapIndex(number, Architecture.Count),
+            .Nature => wrapIndex(number, Nature.Count),
+            .Symbols => wrapIndex(number, Symbols.Count),
+            .Other => wrapIndex(number, Other.Count),
+        };
+
         return switch (self) {
-            .Dither => Dither.sprite(@enumFromInt(number)),
-            .Dots => Dots.sprite(@enumFromInt(number)),
-            .Dashes => Dashes.sprite(@enumFromInt(number)),
-            .Lines => Lines.sprite(@enumFromInt(number)),
-            .Waves => Waves.sprite(@enumFromInt(number)),
-            .Grid => Grid.sprite(@enumFromInt(number)),
-            .Checked => Checked.sprite(@enumFromInt(number)),
-            .Rectilinear => Rectilinear.sprite(@enumFromInt(number)),
-            .Radial => Radial.sprite(@enumFromInt(number)),
-            .Round => Round.sprite(@enumFromInt(number)),
-            .Woven => Woven.sprite(@enumFromInt(number)),
-            .Architecture => Architecture.sprite(@enumFromInt(number)),
-            .Nature => Nature.sprite(@enumFromInt(number)),
-            .Symbols => Symbols.sprite(@enumFromInt(number)),
-            .Other => Other.sprite(@enumFromInt(number)),
+            .Dither => Dither.sprite(@enumFromInt(idx)),
+            .Dots => Dots.sprite(@enumFromInt(idx)),
+            .Dashes => Dashes.sprite(@enumFromInt(idx)),
+            .Lines => Lines.sprite(@enumFromInt(idx)),
+            .Waves => Waves.sprite(@enumFromInt(idx)),
+            .Grid => Grid.sprite(@enumFromInt(idx)),
+            .Checked => Checked.sprite(@enumFromInt(idx)),
+            .Rectilinear => Rectilinear.sprite(@enumFromInt(idx)),
+            .Radial => Radial.sprite(@enumFromInt(idx)),
+            .Round => Round.sprite(@enumFromInt(idx)),
+            .Woven => Woven.sprite(@enumFromInt(idx)),
+            .Architecture => Architecture.sprite(@enumFromInt(idx)),
+            .Nature => Nature.sprite(@enumFromInt(idx)),
+            .Symbols => Symbols.sprite(@enumFromInt(idx)),
+            .Other => Other.sprite(@enumFromInt(idx)),
         };
     }
 
