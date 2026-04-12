@@ -78,14 +78,22 @@ const App = struct {
     fn render(self: *App) void {
         const s = self.gallery.sprite(self.number);
 
+        { // Update the img
+            if (self.color == .white) {
+                for (s, 0..) |b, i| img[6 + i] = ~b;
+            } else {
+                img[6..14].* = s;
+            }
+        }
+
         ff.clearScreen(if (self.color == .white) .black else .white);
 
         for (0..600) |i| {
-            const n: i32 = @intCast(i);
-            const x: i32 = @mod(n, 30) * 8;
-            const y: i32 = @divTrunc(n, 30) * 8;
-
-            self.blit(x, y, s);
+            drawSpritePoints(
+                @intCast((i % 30) * 8),
+                @intCast((i / 30) * 8),
+                self.color,
+            );
         }
 
         if (!btn.e) {
@@ -121,20 +129,6 @@ const App = struct {
         self.number += 1;
     }
 
-    fn blit(self: *App, x: i32, y: i32, sprite: [8]u8) void {
-        var bytes = sprite;
-
-        if (self.color == .white) {
-            for (&bytes) |*byte| {
-                byte.* = ~byte.*;
-            }
-        }
-
-        img[0x6..0xE].* = bytes;
-
-        ff.drawImage(&img, ff.Point.new(x, y));
-    }
-
     fn zoom(g: Gallery, c: ff.Color, sprite: [8]u8) void {
         const s = ff.Style{ .fill_color = c, .stroke_color = if (c == .white) .black else .white, .stroke_width = 1 };
 
@@ -156,6 +150,24 @@ const App = struct {
 
         ff.draw.rect(8, 3, @intCast(3 + tn.len * 6), 12, .{ .fill_color = .black });
         ff.draw.Text(tn, fff, pt, .white);
+    }
+
+    fn drawSpritePoints(x: i32, y: i32, c: ff.Color) void {
+        const invert = (c == .black);
+
+        var row: i32 = 0;
+        while (row < 8) : (row += 1) {
+            const bits = img[6 + @as(usize, @intCast(row))];
+
+            var col: i32 = 0;
+            while (col < 8) : (col += 1) {
+                const bit = (bits >> (7 - @as(u3, @intCast(col)))) & 1;
+
+                if ((bit == 1) != invert) {
+                    ff.drawPoint(.new(x + col, y + row), c);
+                }
+            }
+        }
     }
 
     var img = [14]u8{
