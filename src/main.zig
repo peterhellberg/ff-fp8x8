@@ -44,10 +44,16 @@ pub export fn render() void {
 }
 
 const App = struct {
-    palette: PaletteW4 = .MacPaint,
     gallery: Gallery = .Nature,
+    palette: Palette = .ObraDinnIBM8503,
     number: i32 = 16,
+
     color: ff.Color = .white,
+
+    sprite: [8]u8 = @splat(0),
+    imgv2: [4 + 19200]u8 = @splat(0),
+
+    dirty: bool = true,
 
     fn boot(self: *App) void {
         fff = ff.loadFile("font", buf[0..]);
@@ -69,35 +75,34 @@ const App = struct {
         if (btn.n and !pre.n) self.nextPalette();
         if (btn.s and !pre.s) {
             self.color = if (self.color == .white) .black else .white;
+            self.dirty = true;
         }
 
         pre = btn;
         old = pad;
+
+        if (self.dirty) self.clean();
+    }
+
+    fn clean(self: *App) void {
+        self.sprite = self.gallery.sprite(self.number);
+
+        if (self.color == .white) {
+            for (self.sprite, 0..) |b, i| imgv1[6 + i] = ~b;
+        } else {
+            imgv1[6..14].* = self.sprite;
+        }
+
+        self.convert();
+        self.dirty = false;
     }
 
     fn render(self: *App) void {
-        const s = self.gallery.sprite(self.number);
-
-        { // Update the img
-            if (self.color == .white) {
-                for (s, 0..) |b, i| img[6 + i] = ~b;
-            } else {
-                img[6..14].* = s;
-            }
-        }
-
         ff.clearScreen(if (self.color == .white) .black else .white);
-
-        for (0..600) |i| {
-            drawSpritePoints(
-                @intCast((i % 30) * 8),
-                @intCast((i / 30) * 8),
-                self.color,
-            );
-        }
+        ff.drawImage(&self.imgv2, .{});
 
         if (!btn.e) {
-            zoom(self.gallery, self.color, s);
+            zoom(self.gallery, self.color, self.sprite);
         }
     }
 
@@ -111,26 +116,70 @@ const App = struct {
 
         ff.setColorHex(.black, p[0]);
         ff.setColorHex(.white, p[1]);
+
+        self.dirty = true;
     }
 
     fn prevGallery(self: *App) void {
         self.gallery = self.gallery.prev();
+        self.dirty = true;
     }
 
     fn nextGallery(self: *App) void {
         self.gallery = self.gallery.next();
+        self.dirty = true;
     }
 
     fn prevPattern(self: *App) void {
         self.number -|= 1;
+        self.dirty = true;
     }
 
     fn nextPattern(self: *App) void {
         self.number += 1;
+        self.dirty = true;
+    }
+
+    fn convert(self: *App) void {
+        self.imgv2[0..4].* = .{ 0x22, 240, 0, 0xFF };
+
+        const src = imgv1[6..14];
+
+        var tile: [8][4]u8 = undefined;
+
+        inline for (0..8) |row| {
+            const bits = src[row];
+
+            inline for (0..4) |i| {
+                const b0: u8 = if (((bits >> @as(u3, @intCast(7 - i * 2))) & 1) != 0) 0 else 12;
+                const b1: u8 = if (((bits >> @as(u3, @intCast(6 - i * 2))) & 1) != 0) 0 else 12;
+
+                tile[row][i] = (b0 << 4) | b1;
+            }
+        }
+
+        for (0..20) |ty| {
+            inline for (0..8) |row| {
+                const dst_row = 4 + (ty * 8 + row) * 120;
+
+                for (0..30) |tx| {
+                    const dst = dst_row + tx * 4;
+
+                    self.imgv2[dst + 0] = tile[row][0];
+                    self.imgv2[dst + 1] = tile[row][1];
+                    self.imgv2[dst + 2] = tile[row][2];
+                    self.imgv2[dst + 3] = tile[row][3];
+                }
+            }
+        }
     }
 
     fn zoom(g: Gallery, c: ff.Color, sprite: [8]u8) void {
-        const s = ff.Style{ .fill_color = c, .stroke_color = if (c == .white) .black else .white, .stroke_width = 1 };
+        const s = ff.Style{
+            .fill_color = c,
+            .stroke_color = if (c == .white) .black else .white,
+            .stroke_width = 1,
+        };
 
         for (0.., sprite) |r, u| {
             const y: i32 = @intCast(r * 20);
@@ -152,25 +201,7 @@ const App = struct {
         ff.draw.Text(tn, fff, pt, .white);
     }
 
-    fn drawSpritePoints(x: i32, y: i32, c: ff.Color) void {
-        const invert = (c == .black);
-
-        var row: i32 = 0;
-        while (row < 8) : (row += 1) {
-            const bits = img[6 + @as(usize, @intCast(row))];
-
-            var col: i32 = 0;
-            while (col < 8) : (col += 1) {
-                const bit = (bits >> (7 - @as(u3, @intCast(col)))) & 1;
-
-                if ((bit == 1) != invert) {
-                    ff.drawPoint(.new(x + col, y + row), c);
-                }
-            }
-        }
-    }
-
-    var img = [14]u8{
+    var imgv1 = [14]u8{
         // Heaader
         0x21,
         1, // BPP
@@ -296,24 +327,24 @@ const Gallery = enum {
     }
 };
 
-const PaletteW4 = enum {
+const Palette = enum {
     OneBitMonitorGlow, // https://lospec.com/palette-list/1bit-monitor-glow
     ObraDinnIBM8503, // https://lospec.com/palette-list/obra-dinn-ibm-8503
     MacPaint, // https://lospec.com/palette-list/mac-paint
     Note2C, // https://lospec.com/palette-list/note-2c
     IBM51, // https://lospec.com/palette-list/ibm-51
 
-    fn colors(self: PaletteW4) [4]u32 {
+    fn colors(self: Palette) [2]u32 {
         return switch (self) {
-            .OneBitMonitorGlow => .{ 0xf0f6f0, 0x222323, 0, 0 },
-            .ObraDinnIBM8503 => .{ 0xebe5ce, 0x2e3037, 0, 0 },
-            .MacPaint => .{ 0x8bc8fe, 0x051b2c, 0, 0 },
-            .Note2C => .{ 0xedf2e2, 0x222a3d, 0, 0 },
-            .IBM51 => .{ 0xd3c9a1, 0x323c39, 0, 0 },
+            .OneBitMonitorGlow => .{ 0xf0f6f0, 0x222323 },
+            .ObraDinnIBM8503 => .{ 0xebe5ce, 0x2e3037 },
+            .MacPaint => .{ 0x8bc8fe, 0x051b2c },
+            .Note2C => .{ 0xedf2e2, 0x222a3d },
+            .IBM51 => .{ 0xd3c9a1, 0x323c39 },
         };
     }
 
-    fn next(self: PaletteW4) PaletteW4 {
+    fn next(self: Palette) Palette {
         return switch (self) {
             .OneBitMonitorGlow => .ObraDinnIBM8503,
             .ObraDinnIBM8503 => .MacPaint,
